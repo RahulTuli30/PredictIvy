@@ -1,14 +1,17 @@
 class Garden(object):
 
-	def __init__(self, arg, width, height):
-		super(ClassName, sel
-
-			f).__init__()
-		self.arg = arg
+	def __init__(self, width, height):
 		self.width = width
 		self.height = height
 		self.grid = self.initGrid(width, height)
-
+	
+	def __str__(self):
+		garden = []
+		for i in range(self.width):
+			garden.append("".join([self.grid[i][j] for j in range(self.height)]))
+		garden = "\n".join(garden) 	
+		return garden
+	
 	def initGrid(self, width, height):
 		
 		grid = {}
@@ -19,38 +22,64 @@ class Garden(object):
 		return grid
 
 	def setPlotXYTo(self, x, y, newValue):
-		pass
+		self.grid[x][y] = newValue
 
-	def getPlotXY(self, x, y)
+	def getPlotXY(self, x, y):
 		return self.grid[x][y]
 
-	def printPlot(self):
-		for i in self.width:
-			for j in self.height:
-				print(self.grid[i][j], end = "")
-			print()
+	def printGarden(self):
+		print(self)
 
+DELIMITER = ","
+
+
+def getInstructions(config):
+	instructions = []
+	for elem in config:
+		instructions.append(elem.split(DELIMITER))
+	return instructions
+
+
+def updateGarden(garden, config):
+	instructions = getInstructions(config)
+	executeInstructionsOnGarden(garden, instructions)
+
+def executeInstructionsOnGarden(garden,instructions):
+	for instruction in instructions:
+		if instruction[0].isalpha():
+			garden.setPlotXYTo(x=int(instruction[1]), y=int(instruction[2]), newValue=instruction[0])
 
 def getInputForHackerRank():
 	input = []
-    for line in fileinput, input():
-        input.append(line)
-    return input
+	for line in fileinput.input():
+		input.append(line)
+	return input
 
 def getGardenFromFile(filename):
+	data = readFile(filename)
+	width, height=getWidthAndHeight(data)
+	data = data[1:] #removing first line  
+	garden = Garden(width, height)
+	updateGarden(garden, data)
+	return garden
 
+
+def readFile(filename):
 	with open(filename, "r") as f:
 		data = f.readlines()
+	return data
 
-	print(len(data))
-	print(data)
-
-
+def getWidthAndHeight(data):
+	first_line = data[0]
+	width, height = (int(i) for i in first_line.strip().split(DELIMITER))
+	#print(width, height)
+	return width, height
 
 def PredictIvyGrowth():
 	filename = r"input.txt"
-	getGardenFromFile(filename)
-
+	garden = getGardenFromFile(filename)
+	print(garden)
+	
 
 if __name__ == '__main__':
 	PredictIvyGrowth()
