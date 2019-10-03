@@ -1,3 +1,5 @@
+DELIMITER = ","
+
 class Garden(object):
 
 	def __init__(self, width, height):
@@ -22,17 +24,14 @@ class Garden(object):
 		return grid
 
 	def setPlotXYTo(self, x, y, newValue):
-		self.grid[x][y] = newValue
+		 if self.grid[x][y] == 'B':
+		 	self.grid[x][y] = newValue
+		 else:
+		 	self.done()
 
 	def getPlotXY(self, x, y):
 		return self.grid[x][y]
-
-	def printGarden(self):
-		print(self)
-
-DELIMITER = ","
-
-
+		
 def getInstructions(config):
 	instructions = []
 	for elem in config:
@@ -48,12 +47,6 @@ def executeInstructionsOnGarden(garden,instructions):
 	for instruction in instructions:
 		if instruction[0].isalpha():
 			garden.setPlotXYTo(x=int(instruction[1]), y=int(instruction[2]), newValue=instruction[0])
-
-def getInputForHackerRank():
-	input = []
-	for line in fileinput.input():
-		input.append(line)
-	return input
 
 def getGardenFromFile(filename):
 	data = readFile(filename)
@@ -79,7 +72,7 @@ def PredictIvyGrowth():
 	filename = r"input.txt"
 	garden = getGardenFromFile(filename)
 	print(garden)
-	
+
 
 if __name__ == '__main__':
 	PredictIvyGrowth()
