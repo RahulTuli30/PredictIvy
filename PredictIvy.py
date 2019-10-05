@@ -2,17 +2,19 @@ DELIMITER = ","
 
 
 class Garden(object):
+    __slots__ = "width", "height", "plot", "ivyLocations"
 
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.grid = self.initGrid(width, height)
+        self.plot = self.initGrid(width, height)
+        self.ivyLocations = set()
 
     def __str__(self):
         garden = []
         for i in range(self.width):
             garden.append(
-                "".join([self.grid[i][j] for j in range(self.height)]))
+                "".join([self.plot[i][j] for j in range(self.height)]))
         garden = "\n".join(garden)
         return garden
 
@@ -26,13 +28,20 @@ class Garden(object):
         return grid
 
     def setPlotXYTo(self, x, y, newValue):
-        if self.grid[x][y] == 'B':
-            self.grid[x][y] = newValue
-        else:
-            self.done()
+        if self.plot[x][y] == 'B':
+            self.plot[x][y] = newValue
+
+        if self.isIvy(newValue):
+            self.ivyLocations.add((x, y))
+
+    def isIvy(self, value):
+        return value == 'I'
 
     def getPlotXY(self, x, y):
-        return self.grid[x][y]
+        return self.plot[x][y]
+
+    def getAllIvyLocations(self):
+        return self.ivyLocations
 
 
 def getInstructions(config):
