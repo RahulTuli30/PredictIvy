@@ -1,5 +1,6 @@
 DELIMETER = ","
 BLANK_PLOT = "B"
+Goal_state = "F"
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -9,8 +10,7 @@ def main(filename="input.txt"):
     config = readFromFile(filename)
     dimensions, instructions = getDimensionsAndInstructions(config=config)
     garden = createGarden(dimensions, instructions)
-    pp.pprint(garden)
-    pass
+    growTillConsumption(garden)
 
 
 def readFromFile(filename):
@@ -53,6 +53,68 @@ def executeParsedInstructionsOnGarden(garden, instructions):
     for instruction in instructions:
         garden[instruction[1]][instruction[2]] = instruction[0]
     return garden
+
+
+def growTillConsumption(garden):
+    growPoints = getIvyLocations(garden)
+    days = 0
+    done = False
+    while not done:
+        growPoints = getNextCandidates(growPoints, garden)
+        if willConsume(growPoints, garden) or not growPoints:
+            done = True
+            continue
+        days += 1
+    print(days)
+    pp.pprint(garden)
+
+
+def getIvyLocations(garden):
+    ivyLocations = []
+    for col in garden:
+        for row in col:
+            if garden[col][row] == 'I':
+                ivyLocations.append((col, row))
+    return ivyLocations
+
+
+def getNextCandidates(growPoints, garden):
+    next_candidates = set()
+
+    for growPoint in growPoints:
+        possible_candidates = getCandidatesInFourDirections(growPoint)
+
+    return []  # TODO
+
+
+def getCandidatesInFourDirections(growPoint):
+    north = growPoint[0], growPoint[1] - 1
+    south = growPoint[0], growPoint[1] + 1
+    east = growPoint[0] + 1, growPoint[1]
+    west = growPoint[0] - 1, growPoint[1]
+
+    return [north, south, east, west]
+
+
+def getValidCandidatesInGarden(candidates, garden):
+    pass
+
+
+def isValid(candidate, garden):
+    width = len(garden)
+    heigth = len(garden[0])
+
+    if candidate[0] < 0 or candidate[1] > width - 1:
+        return False
+    if candidate[1] < 0 or candidate[1] > heigth - 1:
+        return False
+    if garden[candidate[0]][candidate[1]] == 'W':
+        return False
+    return True
+
+
+def willConsume(candidates, garden):
+    return True  # TODO
 
 
 if __name__ == "__main__":
