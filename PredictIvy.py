@@ -1,95 +1,59 @@
-DELIMITER = ","
+DELIMETER = ","
+BLANK_PLOT = "B"
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 
-class Garden(object):
-    __slots__ = "width", "height", "plot", "ivyLocations"
-
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.plot = self.initGrid(width, height)
-        self.ivyLocations = set()
-
-    def __str__(self):
-        garden = []
-        for i in range(self.width):
-            garden.append(
-                "".join([self.plot[i][j] for j in range(self.height)]))
-        garden = "\n".join(garden)
-        return garden
-
-    def initGrid(self, width, height):
-
-        grid = {}
-        for x in range(width):
-            grid[x] = {}
-            for y in range(height):
-                grid[x][y] = 'B'
-        return grid
-
-    def setPlotXYTo(self, x, y, newValue):
-        if self.plot[x][y] == 'B':
-            self.plot[x][y] = newValue
-
-        if self.isIvy(newValue):
-            self.ivyLocations.add((x, y))
-
-    def isIvy(self, value):
-        return value == 'I'
-
-    def getPlotXY(self, x, y):
-        return self.plot[x][y]
-
-    def getAllIvyLocations(self):
-        return self.ivyLocations
+def main(filename="input.txt"):
+    config = readFromFile(filename)
+    dimensions, instructions = getDimensionsAndInstructions(config=config)
+    garden = createGarden(dimensions, instructions)
+    pp.pprint(garden)
+    pass
 
 
-def getInstructions(config):
-    instructions = []
-    for elem in config:
-        instructions.append(elem.split(DELIMITER))
-    return instructions
-
-
-def updateGarden(garden, config):
-    instructions = getInstructions(config)
-    executeInstructionsOnGarden(garden, instructions)
-
-
-def executeInstructionsOnGarden(garden, instructions):
-    for instruction in instructions:
-        if instruction[0].isalpha():
-            garden.setPlotXYTo(x=int(instruction[1]), y=int(instruction[2]),
-                               newValue=instruction[0])
-
-
-def getGardenFromFile(filename):
-    data = readFile(filename)
-    width, height = getWidthAndHeight(data)
-    data = data[1:]  # removing first line
-    garden = Garden(width, height)
-    updateGarden(garden, data)
-    return garden
-
-
-def readFile(filename):
+def readFromFile(filename):
     with open(filename, "r") as f:
         data = f.readlines()
     return data
 
 
-def getWidthAndHeight(data):
-    first_line = data[0]
-    width, height = (int(i) for i in first_line.strip().split(DELIMITER))
-    # print(width, height)
-    return width, height
+def getDimensionsAndInstructions(config):
+    dimensions = [int(dimension) for dimension in config[0].split(",")]
+    instructions = config[1:]
+
+    return dimensions, instructions
 
 
-def PredictIvyGrowth():
-    filename = r"input.txt"
-    garden = getGardenFromFile(filename)
-    print(garden)
+def createGarden(dimensions, instructions):
+    garden = {col: {row: BLANK_PLOT for row in range(dimensions[1])}
+              for col in range(dimensions[0])}
+    garden = parseAndExecuteInstructionsOnGarden(garden=garden, instructions=instructions)
+    return garden
 
 
-if __name__ == '__main__':
-    PredictIvyGrowth()
+def parseAndExecuteInstructionsOnGarden(garden, instructions):
+    parsedInstructions = parseInstructions(instructions)
+    garden = executeParsedInstructionsOnGarden(garden, parsedInstructions)
+    return garden
+
+
+def parseInstructions(instructions):
+    return [parseInstruction(instruction) for instruction in instructions]
+
+
+def parseInstruction(instruction):
+    instruction = instruction.split(",")
+    instruction = instruction[0], int(instruction[1]), int(instruction[2])
+    return instruction
+
+
+def executeParsedInstructionsOnGarden(garden, instructions):
+    for instruction in instructions:
+        garden[instruction[1]][instruction[2]] = instruction[0]
+    return garden
+
+
+if __name__ == "__main__":
+    main()
