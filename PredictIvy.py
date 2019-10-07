@@ -1,16 +1,23 @@
 DELIMETER = ","
 BLANK_PLOT = "B"
-Goal_state = "F"
-import pprint
+GOAL_STATE = "F"
+FILENAME = "input.txt"
 
-pp = pprint.PrettyPrinter(indent=4)
+import sys
 
 
-def main(filename="input.txt"):
+def main(arguments):
+    if arguments:
+        run(filename=arguments)
+    else:
+        run(filename=FILENAME)
+
+
+def run(filename):
     config = readFromFile(filename)
     dimensions, instructions = getDimensionsAndInstructions(config=config)
     garden = createGarden(dimensions, instructions)
-    growTillConsumption(garden)
+    growTillConsumption(garden, verbose=False)
 
 
 def readFromFile(filename):
@@ -55,36 +62,41 @@ def executeParsedInstructionsOnGarden(garden, instructions):
     return garden
 
 
-def growTillConsumption(garden):
+def growTillConsumption(garden, verbose=False):
     growPoints = getIvyLocations(garden)
     days = 0
     done = False
     while not done:
         growPoints = getNextCandidates(growPoints, garden)
-        if willConsume(growPoints, garden) or not growPoints:
+        if not growPoints or willConsume(growPoints, garden):
             done = True
             continue
+        garden = grow(growPoints, garden)
         days += 1
+        if verbose:
+            print(days)
+            printGarden(garden)
     print(days)
-    pp.pprint(garden)
+    printGarden(garden)
 
 
 def getIvyLocations(garden):
     ivyLocations = []
     for col in garden:
-        for row in col:
+        for row in garden[col]:
             if garden[col][row] == 'I':
                 ivyLocations.append((col, row))
     return ivyLocations
 
 
 def getNextCandidates(growPoints, garden):
-    next_candidates = set()
+    next_candidates = []
 
     for growPoint in growPoints:
         possible_candidates = getCandidatesInFourDirections(growPoint)
+        next_candidates.extend(getValidCandidatesInGarden(possible_candidates, garden))
 
-    return []  # TODO
+    return set(next_candidates)
 
 
 def getCandidatesInFourDirections(growPoint):
@@ -97,14 +109,14 @@ def getCandidatesInFourDirections(growPoint):
 
 
 def getValidCandidatesInGarden(candidates, garden):
-    pass
+    return [candidate for candidate in candidates if isValid(candidate, garden)]
 
 
 def isValid(candidate, garden):
     width = len(garden)
     heigth = len(garden[0])
-
-    if candidate[0] < 0 or candidate[1] > width - 1:
+    # print(width, heigth)
+    if candidate[0] < 0 or candidate[0] > width - 1:
         return False
     if candidate[1] < 0 or candidate[1] > heigth - 1:
         return False
@@ -114,8 +126,29 @@ def isValid(candidate, garden):
 
 
 def willConsume(candidates, garden):
-    return True  # TODO
+    for candidate in candidates:
+        if isFlowerButNotIvy(candidate, garden):
+            return True
+    return False
+
+
+def isFlowerButNotIvy(candidate, garden):
+    plot_contents = garden[candidate[0]][candidate[1]]
+    return plot_contents == GOAL_STATE
+
+
+def grow(growPoints, garden):
+    for candidate in growPoints:
+        garden[candidate[0]][candidate[1]] = 'I'
+    return garden
+
+
+def printGarden(garden):
+    for row in garden:
+        for col in garden[row]:
+            print(garden[row][col], end="")
+        print()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
